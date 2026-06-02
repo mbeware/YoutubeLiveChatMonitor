@@ -10,77 +10,68 @@
 ### User commands
 ## Mod:Text2Voice
 
+
+
 import pytchat
-import signal
 import asyncio #Less issue with asyncio, but less effective
 
-async def reader(chat_queue,event_stoprequested):
+async def reader(chat_queue,YoutubeLiveStreamID):
     
-    chat = pytchat.create(video_id="DkZwyeYoT-4")
+    chat = pytchat.create(video_id=YoutubeLiveStreamID)
     try:
-        while chat.is_alive() and not event_stoprequested.is_set():
+        while chat.is_alive():
             for c in chat.get().sync_items():
                 await chat_queue.put(c) 
             await asyncio.sleep(0.5)
-    except KeyboardInterrupt:
-        event_stoprequested.set()
+
+    except asyncio.CancelledError:
+        pass
 
     except Exception as e:
         print(f"{e} exception (reader)")
 
+    finally:
+        await chat_queue.put(None) 
 
-async def dispatcher(chat_queue,event_stoprequested):
+async def dispatcher(chat_queue):
+
     try:
-        while not event_stoprequested.is_set():
-
-            c=None
-            try:
-                c=await asyncio.wait_for(chat_queue.get(),timeout=0.5)
-                await asyncio.sleep(0.5)
-            except TimeoutError: 
-                print("No new messages")
-                
-            except KeyboardInterrupt:
-                event_stoprequested.set()
-                return
-            except Exception as e:
-                print(f"{e}")
-          
-            if c: 
-                print(f"{c.datetime} [{c.author.name}]- {c.message}")
-                
-          
-    except KeyboardInterrupt:
-        event_stoprequested.set()
-    
-    except Exception as e:
-        print(f"{e} exception (dispatcher)")
-        # event_stoprequest.set() # this will break out of the loop.
+        while True:
         
+            c=await chat_queue.get() #Blocking/wait forever
+            
+            if c is None: 
+                break
+
+            print(f"{c.datetime} [{c.author.name}]- {c.message}")
+                
+    except asyncio.CancelledError:
+        pass  # We have been cancelled. What did we do????
+        
+     
         
         
 
 async def main():
-
+    YoutubeLiveStreamID = "0SqBi7qdK_c"
 
     # Reader will put messages in a queue
     # Dispatcher will read from queue and invoque appropriate module
 
     # create queue
     chat_queue = asyncio.Queue(0)
-    event_stopRequested = asyncio.Event()
 
-    reader_t = asyncio.create_task(reader(chat_queue,event_stopRequested))
-    dispatcher_t = asyncio.create_task(dispatcher(chat_queue,event_stopRequested))
+    reader_t = asyncio.create_task(reader(chat_queue,YoutubeLiveStreamID))
+    dispatcher_t = asyncio.create_task(dispatcher(chat_queue))
         
 
     try:
         await asyncio.gather(dispatcher_t,reader_t)
-    except Exception as e:
-        print(f"{e} exception (main)")
 
-    event_stopRequested.set()
-    
+    except KeyboardInterrupt:
+        reader_t.cancel()
+        dispatcher_t.cancel()
+        await asyncio.gather(dispatcher_t, reader_t, return_exceptions=True)
 
 
         
