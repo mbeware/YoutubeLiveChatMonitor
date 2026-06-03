@@ -55,7 +55,7 @@ function = "function_name"
 user_groups = ["user", "moderator", "admin"]
 ```
 
-the command name is the name of the command that will be used in the chat. For example, if the command name is "hello", the command will be triggered when a user types "!hello" in the chat.
+the command name is the name of the command that will be used in the chat. For example, if the command prefix is "!" and the command name is "hello", the command will be triggered when a user types ```!hello``` in the chat.
 
 function is the name of the function that will be called when the command is triggered. The function should take a single argument, which will be the message object.
 
@@ -68,15 +68,15 @@ enabled is a boolean field that indicates whether the command is enabled or not.
 Predefined commands:
 
 - reload : This command will reload the config files and the modules. The function for this command is predefined in the BotCommand module, so you don't need to define it in the function file.
-- AddUser : This command will add a user to the user group. The command should be used like this: {prefix}AddUser username.  Moderators and admins can use this command
-- RemoveUser : This command will remove a user from the user group. The command should be used like this: {prefix}RemoveUser username.  Moderators and admins can use this command.
-- AddMod : This command will add a user to the moderator group. The command should be used like this: {prefix}AddMod username. Admins can use this command.
-- RemoveMod : This command will remove a user from the moderator group. The command should be used like this: {prefix}RemoveMod username. Admins can use this command.
-- AddAdmin : This command will add a user to the admin group. The command should be used like this: {prefix}AddAdmin username. Owners can use this command.
-- RemoveAdmin : This command will remove a user from the admin group. The command should be used like this: {prefix}RemoveAdmin username. Owners can use this command.
-- enableCommand : This command will enable a command. The command should be used like this: {prefix}enableCommand command_name. Admins and moderator can use this command.
-- disableCommand : This command will disable a command. The command should be used like this: {prefix}disableCommand command_name. Admins and moderator can use this command.
-- ResetUsage : This command will reset the usage count for a user for a specific command. The command should be used like this: {prefix}ResetUsage username command_name. Admins and moderator can use this command.
+- AddUser : This command will add a user to the user group. The command should be used like this: ```<prefix>AddUser username```.  Moderators and admins can use this command
+- RemoveUser : This command will remove a user from the user group. The command should be used like this: ```<prefix>RemoveUser username```.  Moderators and admins can use this command.
+- AddMod : This command will add a user to the moderator group. The command should be used like this: ```<prefix>AddMod username```. Admins can use this command.
+- RemoveMod : This command will remove a user from the moderator group. The command should be used like this: ```<prefix>RemoveMod username```. Admins can use this command.
+- AddAdmin : This command will add a user to the admin group. The command should be used like this: ```<prefix>AddAdmin username```. Owners can use this command.
+- RemoveAdmin : This command will remove a user from the admin group. The command should be used like this: ```<prefix>RemoveAdmin username```. Owners can use this command.
+- enableCommand : This command will enable a command. The command should be used like this: ```<prefix>enableCommand command_name```. Admins and moderator can use this command.
+- disableCommand : This command will disable a command. The command should be used like this: ```<prefix>disableCommand command_name```. Admins and moderator can use this command.
+- ResetUsage : This command will reset the usage count for a user for a specific command. The command should be used like this: ```<prefix>ResetUsage username``` command_name. Admins and moderator can use this command.
   
 The members for each groups are stored in the BotCommandACL.toml config file, so they will persist even after the bot is restarted. The groups members are stored in the config file in the following format:
 
