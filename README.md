@@ -74,8 +74,8 @@ Predefined commands:
 - RemoveMod : This command will remove a user from the moderator group. The command should be used like this: ```<prefix>RemoveMod username```. Admins can use this command.
 - AddAdmin : This command will add a user to the admin group. The command should be used like this: ```<prefix>AddAdmin username```. Owners can use this command.
 - RemoveAdmin : This command will remove a user from the admin group. The command should be used like this: ```<prefix>RemoveAdmin username```. Owners can use this command.
-- enableCommand : This command will enable a command. The command should be used like this: ```<prefix>enableCommand command_name```. Admins and moderator can use this command.
-- disableCommand : This command will disable a command. The command should be used like this: ```<prefix>disableCommand command_name```. Admins and moderator can use this command.
+- enableCommand : This command will enable a command. The command should be used like this: ```<prefix>enableCommand command_name```. Admins and moderator can use this command. The change will not persist after the bot is restarted. The default state of the command (enabled or disabled) is determined by the enabled field in the config file.
+- disableCommand : This command will disable a command. The command should be used like this: ```<prefix>disableCommand command_name```. Admins and moderator can use this command. The change will not persist after the bot is restarted. The default state of the command (enabled or disabled) is determined by the enabled field in the config file.
 - ResetUsage : This command will reset the usage count for a user for a specific command. The command should be used like this: ```<prefix>ResetUsage username``` command_name. Admins and moderator can use this command.
   
 The members for each groups are stored in the BotCommandACL.toml config file, so they will persist even after the bot is restarted. The groups members are stored in the config file in the following format:
