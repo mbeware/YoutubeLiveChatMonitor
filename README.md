@@ -68,15 +68,15 @@ enabled is a boolean field that indicates whether the command is enabled or not.
 Predefined commands:
 
 - reload : This command will reload the config files and the modules. The function for this command is predefined in the BotCommand module, so you don't need to define it in the function file.
-- AddUser : This command will add a user to the user group. The command should be used like this: <prefix>AddUser username.  Moderators and admins can use this command
-- RemoveUser : This command will remove a user from the user group. The command should be used like this: <prefix>RemoveUser username.  Moderators and admins can use this command.
-- AddMod : This command will add a user to the moderator group. The command should be used like this: <prefix>AddMod username. Admins can use this command.
-- RemoveMod : This command will remove a user from the moderator group. The command should be used like this: <prefix>RemoveMod username. Admins can use this command.
-- AddAdmin : This command will add a user to the admin group. The command should be used like this: <prefix>AddAdmin username. Owners can use this command.
-- RemoveAdmin : This command will remove a user from the admin group. The command should be used like this: <prefix>RemoveAdmin username. Owners can use this command.
-- enableCommand : This command will enable a command. The command should be used like this: <prefix>enableCommand command_name. Admins and moderator can use this command.
-- disableCommand : This command will disable a command. The command should be used like this: <prefix>disableCommand command_name. Admins and moderator can use this command.
-- ResetUsage : This command will reset the usage count for a user for a specific command. The command should be used like this: <prefix>ResetUsage username command_name. Admins and moderator can use this command.
+- AddUser : This command will add a user to the user group. The command should be used like this: {prefix}AddUser username.  Moderators and admins can use this command
+- RemoveUser : This command will remove a user from the user group. The command should be used like this: {prefix}RemoveUser username.  Moderators and admins can use this command.
+- AddMod : This command will add a user to the moderator group. The command should be used like this: {prefix}AddMod username. Admins can use this command.
+- RemoveMod : This command will remove a user from the moderator group. The command should be used like this: {prefix}RemoveMod username. Admins can use this command.
+- AddAdmin : This command will add a user to the admin group. The command should be used like this: {prefix}AddAdmin username. Owners can use this command.
+- RemoveAdmin : This command will remove a user from the admin group. The command should be used like this: {prefix}RemoveAdmin username. Owners can use this command.
+- enableCommand : This command will enable a command. The command should be used like this: {prefix}enableCommand command_name. Admins and moderator can use this command.
+- disableCommand : This command will disable a command. The command should be used like this: {prefix}disableCommand command_name. Admins and moderator can use this command.
+- ResetUsage : This command will reset the usage count for a user for a specific command. The command should be used like this: {prefix}ResetUsage username command_name. Admins and moderator can use this command.
   
 The members for each groups are stored in the BotCommandACL.toml config file, so they will persist even after the bot is restarted. The groups members are stored in the config file in the following format:
 
@@ -105,4 +105,6 @@ def cmd_hello(message):
     
 ```
 
-#### LLM usage disclosure :  this README file was created with some help from LLM autocomplete feature of VSCode (copilot and local LLM) and chatGPT. The LLM was used to generate the initial content of the README file, and then the content was edited and modified by me to fit the project. The LLM was also used to generate some of the code snippets in the README file, but all the code snippets were reviewed and modified by me to ensure they are correct and relevant to the project
+##### LLM usage disclosure
+
+this README file was created with some help from LLM autocomplete feature of VSCode (copilot and local LLM) and chatGPT. The LLM was used to generate the initial content of the README file, and then the content was edited and modified by me to fit the project. The LLM was also used to generate some of the code snippets in the README file, but all the code snippets were reviewed and modified by me to ensure they are correct and relevant to the project
