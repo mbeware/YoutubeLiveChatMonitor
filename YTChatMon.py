@@ -112,14 +112,16 @@ def create_config():
     # Create a new TOML document
     config = tomlkit.document()
     config_general = tomlkit.table()
-    config_general["modules_list"] = []
+    config_general["modules_list"] = ["printmsg","TTS"]
+    config_printmsg = tomlkit.table()
+    config_printmsg.add(('file_path = "printmsg/printmsg.py"'))
+    config_tts = tomlkit.table()
+    config_tts.add(('file_path = "ttsbot/ttsbot.py"'))
+   
     config.add("general",config_general)
-    config.add(tomlkit.comment('modules_list = ["module1", "module2"]'))
-    config.add(tomlkit.comment("[module1]") )
-    config.add(tomlkit.comment('file_path = "path/module1.py"'))
-    config.add(tomlkit.comment('[module2]'))
-    config.add(tomlkit.comment('file_path = "path/module2.py"'))
-
+    config.add("printmsg",config_printmsg)
+    config.add("ttsbot",config_tts)
+    
     # Write to file
     with open(config_file, "w") as toml_file:
         toml_file.write(tomlkit.dumps(config))
