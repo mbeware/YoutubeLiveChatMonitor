@@ -6,16 +6,16 @@ Installation :
 
 1. Clone the repository: git clone
 2. Navigate to the project directory: `cd YoutubeLiveChatMonitor`
-3. Install the required dependencies: `pip install -r requirements.txt`
+3. Install the required dependencies: `pip install -r requirements.txt --break-system-packages`
 4. Install the required dependencies for the modules you want to use. Each module may have its own dependencies, so make sure to check the documentation for each module for the required dependencies and install them using pip.
-5. create the config files: python YTChatMon.py --create-config
-6. Edit the config files to add your modules and commands. The config files are located in the .config/YoutubeLiveChatMonitor folder in your home directory. The main config file is config.toml, and the BotCommand module config file is bot_command.toml. The permissions for the user groups are defined in the BotCommandACL.toml config file.
-7. Run the bot: `python YTChatMon.py --channel <CHANNEL_ID>`. Replace <CHANNEL_ID> with the ID of the YouTube channel you want to monitor. You can find the channel ID in the URL of the channel. For example, if the channel URL is <https://www.youtube.com/channel/CHANNEL_ID>, then the channel ID is CHANNEL_ID.
-8. The bot will start monitoring the live chat messages for the specified channel and execute the modules and commands as configured in the config files.
+5. create the config files: python YTChatMon.py --install
+6. (optionnal) Edit the config files to add your modules and commands. The config files are located in the .config/YoutubeLiveChatMonitor folder in your home directory. The main config file is config.toml, and the BotCommand module config file is bot_command.toml. The permissions for the user groups are defined in the BotCommandACL.toml config file.
+7. Run the bot: `python YTChatMon.py --streamid <STREAM_ID>`. Replace <STREAM_ID> with the ID of the YouTube stream you want to monitor. You can find the stream ID in the URL of the stream (the part after the =). For example, if the URL of the stream is https://www.youtube.com/watch?v=abc123, the stream ID is abc123.
+8. The bot will start monitoring the live chat messages for the specified stream and execute the modules and commands as configured in the config files.
 
 ## loading modules
 
-The config.toml in the .config/YoutubeLiveChatMonitor folder from the user's home directory contains the list of modules to load. the __init__.py file in each of the modules folder will be executed for each module in this list, and the file_path field for each module will be used to load the module. IN the __init__.py file, you can define a function called "process_message" that will be called for each message received from the live chat. The function should take a single argument, which will be the message object.
+The config.toml in the .config/YoutubeLiveChatMonitor folder from the user's home directory contains the list of modules to load. The file_path field for each module will be used to load the module. Each module has to have a function called "process_message" that will be called for each message received from the live chat. The function should take a single argument, which will be the message object.
 
 ```toml
 [general]
@@ -107,4 +107,4 @@ def cmd_hello(message):
 
 ##### LLM usage disclosure
 
-this README file was created with some help from LLM autocomplete feature of VSCode (copilot and local LLM) and chatGPT. The LLM was used to generate the initial content of the README file, and then the content was edited and modified by me to fit the project. The LLM was also used to generate some of the code snippets in the README file, but all the code snippets were reviewed and modified by me to ensure they are correct and relevant to the project
+The code for this project has been handwritten by me (and normal auto-complete). The README file was created with some help from LLM autocomplete feature of VSCode (copilot and local LLM) and chatGPT. The LLM was used to generate the initial content of the README file, and then the content was edited and modified by me to fit the project. The LLM was also used to generate some of the code snippets in the README file, but all the code snippets were reviewed and modified by me to ensure they are correct and relevant to the project.

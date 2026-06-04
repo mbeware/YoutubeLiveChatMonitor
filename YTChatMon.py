@@ -100,15 +100,13 @@ def create_config():
     config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" 
     config_file = config_path / "config.toml" 
 
+    # Creates all intermediate directories if they don't exist
+    os.makedirs(config_path , exist_ok=True)
     
     if config_file.exists():
         raise FileExistsError(f"Config file already exists: {config_path}")
 
-    # Creates all intermediate directories if they don't exist
-    os.makedirs(config_path , exist_ok=True)
 
-
-    
     # Create a new TOML document
     config = tomlkit.document()
     config_general = tomlkit.table()
@@ -121,7 +119,7 @@ def create_config():
     config.add("general",config_general)
     config.add("printmsg",config_printmsg)
     config.add("ttsbot",config_tts)
-    
+
     # Write to file
     with open(config_file, "w") as toml_file:
         toml_file.write(tomlkit.dumps(config))
@@ -135,7 +133,7 @@ def main():
                     epilog='a mbeware monstruosity')
 
     parser.add_argument('--install',action='store_true',help='Create configuration files')
-    parser.add_argument('--videoid',help='Start monitoring the live stream') 
+    parser.add_argument('--streamid',help='Start monitoring the live stream') 
     parser.add_argument('--debug',help=argparse.SUPPRESS) 
     
     args = parser.parse_args()
@@ -148,8 +146,8 @@ def main():
 
 
 
-    if not args.videoid: 
-        args.videoid='tOtNbEnzHTQ' # for testing. 
+    if not args.streamid: 
+        args.streamid='tOtNbEnzHTQ' # for testing. 
 
     asyncio.run(start_monitor(args,modules))
     return 0 
