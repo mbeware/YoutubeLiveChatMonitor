@@ -1,0 +1,3 @@
+pytchat
+tomlkit
+edge_tts
