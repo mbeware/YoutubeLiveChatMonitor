@@ -47,6 +47,16 @@ async def text_to_speech_async(
                 "ffplay",
                 "-nodisp",
                 "-autoexit",
+                "beep.mp3",
+                stdout=asyncio.subprocess.DEVNULL,
+                stderr=asyncio.subprocess.DEVNULL
+            )
+            await asyncio.sleep(2)
+
+            await asyncio.create_subprocess_exec(
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
                 output_file,
                 stdout=asyncio.subprocess.DEVNULL,
                 stderr=asyncio.subprocess.DEVNULL
