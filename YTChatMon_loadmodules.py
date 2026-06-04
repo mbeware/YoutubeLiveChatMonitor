@@ -5,7 +5,7 @@ from typing import List
 import tomllib  # Python 3.11+
 
 
-def load_modules_from_config() -> List[str]:
+def load_modules_from_config():
     config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" / "config.toml"
 
     if not config_path.exists():
@@ -23,7 +23,7 @@ def load_modules_from_config() -> List[str]:
 
     for module_name in modules_list:
         module_info = config.get(module_name)
-
+        print(f"loading module {module_name}")
         if not module_info or "file_path" not in module_info:
             raise ValueError(f"Invalid config for '{module_name}'")
 
@@ -47,5 +47,6 @@ def load_modules_from_config() -> List[str]:
         spec.loader.exec_module(module)
 
         loaded_modules[module_name] = module
+        print(f"module {module_name} loaded")
 
     return loaded_modules
