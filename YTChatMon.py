@@ -2,8 +2,9 @@
 # Todo 
 ############
 # [X] Reader
-# [ ] Dispatcher
-## [ ] DynamicModules
+# [X] Dispatcher
+## [X] DynamicModules
+## [ ] REplacie with https://pypi.org/project/pluginbase/ 
 ## [ ] Mod:Logguer
 ## [ ] Mod:Commander
 ### [ ] Admin commands
