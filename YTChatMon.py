@@ -21,12 +21,15 @@ import pytchat
 import asyncio #Less issue with asyncio, but less effective
 import inspect
 import tomlkit
+import tomllib
 import os
 
 
 
-async def reader(chat_queue,YoutubeLiveStreamID):
-    
+async def reader(context ):
+    chat_queue = context["chat_queue"]
+    YoutubeLiveStreamID = context["args"].streamid
+
     chat = pytchat.create(video_id=YoutubeLiveStreamID)
     try:
         while chat.is_alive():
@@ -43,8 +46,9 @@ async def reader(chat_queue,YoutubeLiveStreamID):
     finally:
         await chat_queue.put(None) 
 
-async def dispatcher(chat_queue,modules):
-
+async def dispatcher(context):
+    chat_queue = context["chat_queue"]
+    modules = context["modules"]
     try:
         while True:
         
@@ -60,11 +64,11 @@ async def dispatcher(chat_queue,modules):
                     func = module.process_message
 
                     if inspect.iscoroutinefunction(func):
-                        tasks.append(func(message))
+                        tasks.append(func(message,context))
                     else:
                         # wrap sync in thread to avoid blocking
                         loop = asyncio.get_running_loop()
-                        tasks.append(loop.run_in_executor(None, func, message))
+                        tasks.append(loop.run_in_executor(None, func, message, context))
             if len(tasks) > 0 :
                 await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -77,16 +81,16 @@ async def dispatcher(chat_queue,modules):
         
      
         
-async def start_monitor(args,modules):
+async def start_monitor(context):
     # Reader will put messages in a queue
     # Dispatcher will read from queue and invoque appropriate module
-
+    
     # create queue
     chat_queue = asyncio.Queue(0)
-
-    reader_t = asyncio.create_task(reader(chat_queue,args.videoid))
-    dispatcher_t = asyncio.create_task(dispatcher(chat_queue,modules))
-        
+    context["chat_queue"] = chat_queue
+    reader_t = asyncio.create_task(reader(context))
+    dispatcher_t = asyncio.create_task(dispatcher(context))
+         
 
     try:
         await asyncio.gather(dispatcher_t,reader_t)
@@ -124,6 +128,16 @@ def create_config():
     with open(config_file, "w") as toml_file:
         toml_file.write(tomlkit.dumps(config))
 
+def readconfig():
+    config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" / "config.toml"
+
+    if not config_path.exists():
+        raise FileNotFoundError(f"No config file: {config_path}\nRun YTChatMon --install to create it")
+
+    
+    with config_path.open("rb") as f:
+        config = tomllib.load(f)
+        return config
 
 
 def main():
@@ -142,20 +156,17 @@ def main():
         create_config()
         return 0
     
-    modules = load_modules_from_config()
+    context={}
+    context["args"] = args
+    context["config"]=readconfig()
 
-
+    context["modules"] = load_modules_from_config(context)
 
     if not args.streamid: 
-        args.streamid='tOtNbEnzHTQ' # for testing. 
+        args.streamid='QlwUUv9niuM' # for testing. 
 
-    asyncio.run(start_monitor(args,modules))
+    asyncio.run(start_monitor(context))
     return 0 
-    
-    
-    
- 
-
         
 if __name__ == "__main__":
     exit(main())

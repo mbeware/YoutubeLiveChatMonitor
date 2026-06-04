@@ -1,0 +1,81 @@
+[general]
+modules_list = ["printmsg","TTS","TTSall","commands"]
+["printmsg"]
+file_path = "printmsg/printmsg.py"
+["TTS"]
+file_path = "ttsbot/ttsbot.py"
+voice="en-US-GuyNeural"
+rate="+10%"
+pitch="+3Hz"
+volume="0%"
+play_audio="True"
+TTSPrefix = ":speech_balloon:"
+user_groups = ["tts"]
+MaxUsagePerUserPerHour = 60
+DelayBetweenUsageInSeconds = 5
+enabled = true
+beep: bool = True,
+beep_delay: float = 1.5
+
+["TTSall"]
+file_path = "ttsbot/ttsbot.py"
+voice="en-US-GuyNeural"
+rate="+10%"
+pitch="+3Hz"
+volume="0%"
+play_audio="True"
+TTSPrefix = ""
+user_groups = ["ttsall"]
+MaxUsagePerUserPerHour = 90
+DelayBetweenUsageInSeconds = 5
+enabled = true
+beep: bool = True,
+beep_delay: float = 1.5
+
+
+[commands]
+CommandPrefix = ":maple_leaf:"
+file_path = "commands/commands.py"
+
+[commands.AddUser]
+name = "AddUser"
+description = "Add a new validated user"
+function_path = "commands/defaultCommands.py"
+function = "cmd_AddUser"
+user_groups = ["moderator", "admin"]
+MaxUsagePerUserPerHour = -1
+DelayBetweenUsageInSeconds = -1
+enabled = true
+
+[commands.RemoveUser]
+name = "RemoveUser"
+description = "Remove a validated user"
+function_path = "commands/defaultCommands.py"
+function = "cmd_RemoveUser"
+user_groups = ["moderator", "admin"]
+MaxUsagePerUserPerHour = -1
+DelayBetweenUsageInSeconds = -1
+enabled = true
+
+
+[commands.enableCommand]
+name = "enableCommand"
+description = "activate a command"
+function_path = "commands/defaultCommands.py"
+function = "cmd_enableCommand"
+user_groups = [ "admin"]
+MaxUsagePerUserPerHour = -1
+DelayBetweenUsageInSeconds = -1
+enabled = true
+
+
+[commands.disableCommand]
+name = "disableCommand"
+description = "disable a command"
+function_path = "commands/defaultCommands.py"
+function = "cmd_disableCommand"
+user_groups = [ "admin"]
+MaxUsagePerUserPerHour = -1
+DelayBetweenUsageInSeconds = -1
+enabled = true
+

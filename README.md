@@ -15,7 +15,7 @@ Installation :
 
 ## loading modules
 
-The config.toml in the .config/YoutubeLiveChatMonitor folder from the user's home directory contains the list of modules to load. The file_path field for each module will be used to load the module. Each module has to have a function called "process_message" that will be called for each message received from the live chat. The function should take a single argument, which will be the message object.
+The config.toml in the .config/YoutubeLiveChatMonitor folder from the user's home directory contains the list of modules to load. The file_path field for each module will be used to load the module. Each module has to have a function called "process_message" that will be called for each message received from the live chat. The function should take a two arguments (message and context) and return nothing. The context argument is a dictionary that can be used to store any data that needs to be shared between modules. The context dictionary is passed to each module, so any changes made to the context in one module will be available in the next modules.
 
 ```toml
 [general]
@@ -67,7 +67,6 @@ enabled is a boolean field that indicates whether the command is enabled or not.
 
 Predefined commands:
 
-- reload : This command will reload the config files and the modules. The function for this command is predefined in the BotCommand module, so you don't need to define it in the function file.
 - AddUser : This command will add a user to the user group. The command should be used like this: ```<prefix>AddUser username```.  Moderators and admins can use this command
 - RemoveUser : This command will remove a user from the user group. The command should be used like this: ```<prefix>RemoveUser username```.  Moderators and admins can use this command.
 - AddMod : This command will add a user to the moderator group. The command should be used like this: ```<prefix>AddMod username```. Admins can use this command.
@@ -104,6 +103,20 @@ def cmd_hello(message):
     # your command code here
     
 ```
+
+## TTSbot
+
+The TTSbot module is a text-to-speech bot that speak the youtube live chat comment for the users who you have added the permission. Users can select the voice and other parameter for the voice, using the command prefix 🤖💬. any voice in the EDGE_TTS library can be used. The selection for the user is save in a configuration file (TTSBOT_USERCONFIG.toml).  The module can be configured in the config.toml file to set the default voice for the text-to-speech conversion and the prefix for the TTS to speak the message (default 💬). 
+
+Commands for the TTSbot module:
+
+- setVoice : This command will set the voice for the user. The command should be used like this: ```<prefix>setVoice voice_name```. The voice_name is the name of the voice in the EDGE_TTS library. For example, if you want to use the "en-US-JennyNeural" voice, you can set the voice_name to "en-US-JennyNeural". Users can use this command to select their preferred voice for the text-to-speech conversion. Available voices can be found here : [https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462](https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462) 
+  
+- setPitch : This command will set the pitch for the user's voice. The command should be used like this: ```<prefix>setPitch pitch_value```. The pitch_value is percentage (negative or positive). A value of 0 represents the default pitch. Users can use this command to adjust the pitch of their selected voice for the text-to-speech conversion.
+
+- setRate : This command will set the rate for the user's voice. The command should be used like this: ```<prefix>setRate rate_value```. The rate_value is a percentage that represents the rate of the voice. A value of 0 represents the default rate. Users can use this command to adjust the rate of their selected voice for the text-to-speech conversion.
+
+- setVolume : This command will set the volume for a user voice. Only the owner can change the value.  The command should be used like this: ```<prefix>setVolume username volume_value```. The volume_value is a percentage that represents the volume of the voice. A value of 0 represents the default volume. The owner can use this command to adjust the volume of a user's voice for the text-to-speech conversion.
 
 ##### LLM usage disclosure
 

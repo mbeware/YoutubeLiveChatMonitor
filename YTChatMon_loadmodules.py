@@ -4,17 +4,10 @@ from pathlib import Path
 from typing import List
 import tomllib  # Python 3.11+
 
+# This will need to be rewritten. Many special cases arent managed. 
 
-def load_modules_from_config():
-    config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" / "config.toml"
-
-    if not config_path.exists():
-        raise FileNotFoundError(f"No config file: {config_path}\nRun YTChatMon --install to create it")
-
-    
-    with config_path.open("rb") as f:
-        config = tomllib.load(f)
-
+def load_modules_from_config(context):
+    config = context["config"]
     modules_list = config.get("general", {}).get("modules_list", [])
     if not modules_list:
         return []
@@ -23,7 +16,7 @@ def load_modules_from_config():
 
     for module_name in modules_list:
         module_info = config.get(module_name)
-        print(f"loading module {module_name}")
+        print(f"loading module {module_name}",end="")
         if not module_info or "file_path" not in module_info:
             raise ValueError(f"Invalid config for '{module_name}'")
 
@@ -47,6 +40,6 @@ def load_modules_from_config():
         spec.loader.exec_module(module)
 
         loaded_modules[module_name] = module
-        print(f"module {module_name} loaded")
+        print(" .....loaded")
 
     return loaded_modules

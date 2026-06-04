@@ -1,3 +1,4 @@
 pytchat
 tomlkit
+tomllib
 edge_tts

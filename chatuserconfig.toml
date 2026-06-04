@@ -1,0 +1,16 @@
+[general]
+users=["mbeware"]
+mods=["mbeware"]
+admin=["mbeware"]
+
+
+[mbeware]
+[mbeware.tts]
+voice="en-US-GuyNeural"
+rate="+10%"
+pitch="+3Hz"
+volume="0%"
+TTSPrefix = ""
+DelayBetweenUsageInSeconds = 5
+[mbeware.commands]
+bla="blo"
