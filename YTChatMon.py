@@ -80,7 +80,7 @@ async def dispatcher(context):
             if len(tasks) > 0 :
                 await asyncio.gather(*tasks, return_exceptions=True)
 
-            sys.stdout.write(f'\rMessage left in queue : {chat_queue.qsize()}')
+            sys.stdout.write(f'\rMessages left in queue : {chat_queue.qsize()}')
             sys.stdout.flush()
 
 
