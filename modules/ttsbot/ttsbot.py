@@ -35,78 +35,60 @@ class UserVoice:
     pitch : str
 
 
-async def text_to_speech_async(
-    text: str,
-    voice: str = "en-US-AriaNeural",
-    rate: str = "+0%",
-    pitch: str = "+0Hz",
-    volume: str = "0%",
-    output_file: Optional[str] = "TTS.mp3",
-    play_audio: bool = True,
-    beep: bool = True,
-    beep_delay: float = 1.5
-):
+async def play_file(file):
+    try:
+        process = await asyncio.create_subprocess_exec( "ffplay",
+                                                        "-nodisp",
+                                                        "-autoexit",
+                                                        file,
+                                                        stdout=asyncio.subprocess.DEVNULL,
+                                                        stderr=asyncio.subprocess.DEVNULL)
 
+        return process
+    except FileNotFoundError:
+        print("ffplay not found. Install ffmpeg to enable playback.")
+    
+
+
+async def text_to_speech_async( text: str,
+                                voice: str = "en-US-AriaNeural",
+                                rate: str = "+0%",
+                                pitch: str = "+0Hz",
+                                volume: str = "0%",
+                                play_audio: bool = True,
+                                beep: bool = True,
+                                beep_delay: float = 1.5):
+
+    if not play_audio:
+        return #why are we here if we dont want to play the voice?
 
     if not text.strip():
         raise ValueError("Text cannot be empty")
 
-    # Create temp file if needed
-    #if output_file is None:
-    #    output_file = "TTS.mp3"
-    #    tmp = tempfile.NamedTemporaryFile(delete=False, delete_on_close=False, suffix=".mp3")
-    #    output_file = tmp.name
-    #    tmp.close()
-
-
     process = None
-    if play_audio and beep:
-        try:
-            process = await asyncio.create_subprocess_exec(
-                "ffplay",
-                "-nodisp",
-                "-autoexit",
-                "beep.mp3",
-                stdout=asyncio.subprocess.DEVNULL,
-                stderr=asyncio.subprocess.DEVNULL
-            )
-        except FileNotFoundError:
-            print("ffplay not found. Install ffmpeg to enable playback.")
+    if beep:
+        process = await play_file("beep.mp3")
+            
+    full_output_file = f"{tempfile.gettempdir()}/TTSbot.mp3"
 
-
-    full_output_file = f"{tempfile.gettempdir()}/{output_file}"
-    #full_output_file = "TTS.mp3"
     # Generate audio
-    communicate = edge_tts.Communicate(
-        text=text,
-        voice=voice,
-        rate=rate,
-        pitch=pitch
-    )
+    communicate = edge_tts.Communicate( text=text,
+                                        voice=voice,
+                                        rate=rate,
+                                        pitch=pitch)
     
     await communicate.save(full_output_file)
-    #await asyncio.sleep(delay_async)
-    # Optional async playback (non-blocking)
-    if play_audio:
-        try:
-            if beep:
-                await asyncio.sleep(beep_delay)
-            if process:
-                await process.wait()
-            process = await asyncio.create_subprocess_exec(
-                "ffplay",
-                "-nodisp",
-                "-autoexit",
-                full_output_file,
-                stdout=asyncio.subprocess.DEVNULL,
-                stderr=asyncio.subprocess.DEVNULL
-            )
-            await process.wait()
-        except FileNotFoundError:
-            print("ffplay not found. Install ffmpeg to enable playback.")
 
-    return full_output_file
+    if beep:
+        await asyncio.sleep(beep_delay) 
+    if process:
+        await process.wait() # wait for last playback to end. 
+    process = await play_file(full_output_file)
 
+    await process.wait() # wait for playback to end before deleteing file. 
+    os.remove(full_output_file) # cleanup
+    
+    
 
 
 async def process_message(message,context):
@@ -154,15 +136,19 @@ async def process_message(message,context):
     lasttime = newtime
 
     global lastuser
-
-    if lastuser != user: 
-        text = user + " says " + message.message
-        lastuser = user
-    else:
-        text = message.message
     beep_delay = 1
-    file_path = None
-    file_path = await text_to_speech_async(text=text,voice=voice,rate=rate,pitch=pitch,beep=beep,beep_delay=beep_delay)
     
-    if file_path and os.path.exists(file_path):
-        os.remove(file_path)
+    text = message.message
+    
+    if lastuser != user: 
+        pretext = user + " says"
+        await text_to_speech_async(text=pretext,voice="en-US-AnaNeural",rate="+10%",pitch="+5Hz",beep=beep,beep_delay=beep_delay)
+        #text = user + " says " + message.message
+        lastuser = user
+    
+    
+    
+    await text_to_speech_async(text=text,voice=voice,rate=rate,pitch=pitch,beep=False)
+    
+            
+        

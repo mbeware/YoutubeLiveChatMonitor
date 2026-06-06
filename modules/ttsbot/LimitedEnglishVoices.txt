@@ -17,6 +17,4 @@ en-US-GuyNeural
 en-US-JennyNeural               
 en-US-MichelleNeural            
 en-US-RogerNeural               
-en-US-SteffanNeural             
-en-ZA-LeahNeural                
-en-ZA-LukeNeural                
+en-US-SteffanNeural                            
