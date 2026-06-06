@@ -23,6 +23,10 @@ import inspect
 import tomlkit
 import tomllib
 import os
+import sys
+import time
+
+
 
 
 
@@ -36,6 +40,8 @@ async def reader(context ):
             for c in chat.get().sync_items():
                 await chat_queue.put(c) 
             await asyncio.sleep(0.5)
+        
+            
 
     except asyncio.CancelledError:
         pass
@@ -46,14 +52,36 @@ async def reader(context ):
     finally:
         await chat_queue.put(None) 
 
+
+def progress_bar(iteration, total):
+    length=100
+    filledLength = int(length * iteration // total)
+    bar = '█' * filledLength + '-' * (length - filledLength)
+    sys.stdout.write(f'\rMessage Queue |{bar}| {total-iteration} messages left')
+    sys.stdout.flush()
+
 async def dispatcher(context):
     chat_queue = context["chat_queue"]
     modules = context["modules"]
+    
+    max_n=0
+    processed_n=0
+    old_n = 0
     try:
         while True:
-        
-            message=await chat_queue.get() #Blocking/wait forever
+            new_n=chat_queue.qsize()
+            if new_n == 0:
+                max_n = 0
+                old_n = 0
+                processed_n = 0
+            elif new_n > old_n:
+                added_n=new_n-old_n
+                max_n+=added_n
+
+            old_n=new_n
             
+            message=await chat_queue.get() #Blocking/wait forever
+            processed_n +=1
             if message is None: 
                 break
 
@@ -71,6 +99,8 @@ async def dispatcher(context):
                         tasks.append(loop.run_in_executor(None, func, message, context))
             if len(tasks) > 0 :
                 await asyncio.gather(*tasks, return_exceptions=True)
+
+            progress_bar(processed_n, max_n)
 
                 
     except asyncio.CancelledError:
