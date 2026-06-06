@@ -2,16 +2,26 @@
 
 YTChatMon is a Python-based bot designed to monitor YouTube live chat messages in real-time. It provides a modular architecture that allows users to create custom modules for processing chat messages and executing commands. The bot also includes a security system with user groups and permissions to control access to commands.
 
-Installation :
+## Current version
+
+Working version of ytchatmon available. Just download and start with python ytchatmon --streamid <streamid> . I splitted the owner config (for you, the youtuber wanting to use it)  and the sytem config (for the app to work, for the dev, not owner) so you dont need to fiddle with it anymore. 
+
+The version does the following things :
+
+- log all message to file (filename = l)
+- speak all message
+- A random voice is assigned to users on first message. The voices assignation are not persistant between execution of the program (for now)
+- If it has been more than 15 (or 20) seconds since the last message, you will hear a beep approximately 1.5 seconds before the message is played
+- The author of the message is added (<name> says) before the message, unless it is from the same user as the last message
+- *DO NOT USE IT IF YOU HAVE MORE THAN 10-20 ACTIVE VIEWERS IN THE CHAT. THE BOT WILL NEVER BE ABLE TO PLAY ALL MESSAGES*
+  
+# Installation
 
 1. Clone the repository: git clone
 2. Navigate to the project directory: `cd YoutubeLiveChatMonitor`
 3. Install the required dependencies: `pip install -r requirements.txt --break-system-packages`
-4. Install the required dependencies for the modules you want to use. Each module may have its own dependencies, so make sure to check the documentation for each module for the required dependencies and install them using pip.
-5. create the config files: python YTChatMon.py --install
-6. (optionnal) Edit the config files to add your modules and commands. The config files are located in the .config/YoutubeLiveChatMonitor folder in your home directory. The main config file is config.toml, and the BotCommand module config file is bot_command.toml. The permissions for the user groups are defined in the BotCommandACL.toml config file.
-7. Run the bot: `python YTChatMon.py --streamid <STREAM_ID>`. Replace <STREAM_ID> with the ID of the YouTube stream you want to monitor. You can find the stream ID in the URL of the stream (the part after the =). For example, if the URL of the stream is https://www.youtube.com/watch?v=abc123, the stream ID is abc123.
-8. The bot will start monitoring the live chat messages for the specified stream and execute the modules and commands as configured in the config files.
+4. Run the bot: `python YTChatMon.py --streamid <STREAM_ID>`. Replace <STREAM_ID> with the ID of the YouTube stream you want to monitor. You can find the stream ID in the URL of the stream (the part after the =). For example, if the URL of the stream is https://www.youtube.com/watch?v=abc123, the stream ID is abc123.
+5. The bot will start monitoring the live chat messages for the specified stream and execute the modules and commands as configured in the config files.
 
 ## loading modules
 
@@ -26,7 +36,23 @@ file_path = "path/module1.py"
 file_path = "path/module2.py"
 ```
 
-## BotCommand Module configuration
+## *Future IMprovement. Open to comments and suggestions* TTSbot
+
+The TTSbot module is a text-to-speech bot that speak the youtube live chat comment for the users who you have added the permission. Users can select the voice and other parameter for the voice, using the command prefix 🤖💬. any voice in the EDGE_TTS library can be used. The selection for the user is save in a configuration file (TTSBOT_USERCONFIG.toml).  The module can be configured in the config.toml file to set the default voice for the text-to-speech conversion and the prefix for the TTS to speak the message (default 💬). 
+
+Commands for the TTSbot module:
+
+- setVoice : This command will set the voice for the user. The command should be used like this: ```<prefix>setVoice voice_name```. The voice_name is the name of the voice in the EDGE_TTS library. For example, if you want to use the "en-US-JennyNeural" voice, you can set the voice_name to "en-US-JennyNeural". Users can use this command to select their preferred voice for the text-to-speech conversion. Available voices can be found here : [https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462](https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462) 
+  
+- setPitch : This command will set the pitch for the user's voice. The command should be used like this: ```<prefix>setPitch pitch_value```. The pitch_value is percentage (negative or positive). A value of 0 represents the default pitch. Users can use this command to adjust the pitch of their selected voice for the text-to-speech conversion.
+
+- setRate : This command will set the rate for the user's voice. The command should be used like this: ```<prefix>setRate rate_value```. The rate_value is a percentage that represents the rate of the voice. A value of 0 represents the default rate. Users can use this command to adjust the rate of their selected voice for the text-to-speech conversion.
+
+- setVolume : This command will set the volume for a user voice. Only the owner can change the value.  The command should be used like this: ```<prefix>setVolume username volume_value```. The volume_value is a percentage that represents the volume of the voice. A value of 0 represents the default volume. The owner can use this command to adjust the volume of a user's voice for the text-to-speech conversion.
+
+__
+
+## *Future Feature. Open to comments and suggestions* BotCommand Module configuration
 
 Name : bot_command.toml in the .config/YoutubeLiveChatMonitor folder in the user's home directory.
 TOML format is used for the config file. The following fields are required:
@@ -103,20 +129,6 @@ def cmd_hello(message):
     # your command code here
     
 ```
-
-## TTSbot
-
-The TTSbot module is a text-to-speech bot that speak the youtube live chat comment for the users who you have added the permission. Users can select the voice and other parameter for the voice, using the command prefix 🤖💬. any voice in the EDGE_TTS library can be used. The selection for the user is save in a configuration file (TTSBOT_USERCONFIG.toml).  The module can be configured in the config.toml file to set the default voice for the text-to-speech conversion and the prefix for the TTS to speak the message (default 💬). 
-
-Commands for the TTSbot module:
-
-- setVoice : This command will set the voice for the user. The command should be used like this: ```<prefix>setVoice voice_name```. The voice_name is the name of the voice in the EDGE_TTS library. For example, if you want to use the "en-US-JennyNeural" voice, you can set the voice_name to "en-US-JennyNeural". Users can use this command to select their preferred voice for the text-to-speech conversion. Available voices can be found here : [https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462](https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462) 
-  
-- setPitch : This command will set the pitch for the user's voice. The command should be used like this: ```<prefix>setPitch pitch_value```. The pitch_value is percentage (negative or positive). A value of 0 represents the default pitch. Users can use this command to adjust the pitch of their selected voice for the text-to-speech conversion.
-
-- setRate : This command will set the rate for the user's voice. The command should be used like this: ```<prefix>setRate rate_value```. The rate_value is a percentage that represents the rate of the voice. A value of 0 represents the default rate. Users can use this command to adjust the rate of their selected voice for the text-to-speech conversion.
-
-- setVolume : This command will set the volume for a user voice. Only the owner can change the value.  The command should be used like this: ```<prefix>setVolume username volume_value```. The volume_value is a percentage that represents the volume of the voice. A value of 0 represents the default volume. The owner can use this command to adjust the volume of a user's voice for the text-to-speech conversion.
 
 ##### LLM usage disclosure
 
