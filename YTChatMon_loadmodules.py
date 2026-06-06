@@ -14,15 +14,21 @@ def load_modules_from_config(context):
 
     loaded_modules = {}
 
+
+    # Get the absolute path of the script's directory
+    script_dir = Path(__file__).resolve().parent
+
     for module_name in modules_list:
+        
         module_info = config.get(module_name)
+        
         print(f"loading module {module_name}",end="")
         if not module_info or "file_path" not in module_info:
             raise ValueError(f"Invalid config for '{module_name}'")
 
-        # Get the absolute path of the script's directory
-        script_dir = Path(__file__).resolve().parent
-        
+        if "enabled" in module_info and module_info["enabled"] == "False":
+            print(" .....Disabled - not loaded")
+            continue
 
         file_path = script_dir / "modules" / module_info["file_path"]
         

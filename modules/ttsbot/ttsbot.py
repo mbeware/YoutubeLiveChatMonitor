@@ -9,6 +9,30 @@ import edge_tts
 import tempfile
 import subprocess
 from typing import Optional
+from dataclasses import dataclass
+import random
+from pathlib import Path
+import time
+
+
+# initialisation (executed on module load)
+users = {}
+
+voicesfile = Path(__file__).resolve().parent / "LimitedEnglishVoices.txt"
+allvoices = voicesfile.read_text().splitlines() 
+allpitches = ["-10Hz","-5Hz","+0Hz","+5Hz","+10Hz"]
+allrates = ["-5%","+0%","+5%","+10%","+15%"]
+
+
+lastuser = ""
+lasttime = 0
+
+@dataclass
+class UserVoice:
+    name : str
+    voice : str
+    rate : str
+    pitch : str
 
 
 async def text_to_speech_async(
@@ -18,7 +42,7 @@ async def text_to_speech_async(
     pitch: str = "+0Hz",
     volume: str = "0%",
     output_file: Optional[str] = "TTS.mp3",
-    play_audio: bool = False,
+    play_audio: bool = True,
     beep: bool = True,
     beep_delay: float = 1.5
 ):
@@ -33,7 +57,8 @@ async def text_to_speech_async(
     #    tmp = tempfile.NamedTemporaryFile(delete=False, delete_on_close=False, suffix=".mp3")
     #    output_file = tmp.name
     #    tmp.close()
-    delay_async = 2
+
+
     process = None
     if play_audio and beep:
         try:
@@ -82,20 +107,62 @@ async def text_to_speech_async(
 
     return full_output_file
 
+
+
 async def process_message(message,context):
+
+    # This is a Quick and dirty version of what I want to do
+    # Missing stuff : 
+    # Rate limiting
+    # Spam limiting
+    # User validation
+    # User Configuration
+    # User Moderation
+    
+    # In this version, a "voice" is randomly assigned to each user
+    # That assignation is not saved and will probably be different the next time the tool is used.
+     
+
+
     config = context["config"]
     TTS_config = config["TTS"]
 
-    voice=TTS_config["voice"]
-    rate=TTS_config["rate"]
-    pitch=TTS_config["pitch"]
     play_audio=TTS_config["play_audio"] == "True"
 
+    user = message.author.name[1:] # remove the @
+    if user == "Maple-Circuit-Live": 
+        user = "Maple Circuit"
+ 
+    if user not in users.keys():
+        newuser = UserVoice(name = user,       
+                            voice = random.choice(allvoices).strip(),
+                            pitch = random.choice(allpitches).strip(),
+                            rate = random.choice(allrates).strip())
+        users[user] = newuser
 
-    text = message.message
+    voice = users[user].voice
+    rate = users[user].rate
+    pitch = users[user].pitch
+
+    newtime = time.perf_counter()
+    beep = True
+
+    global lasttime 
+
+    if newtime - lasttime < 20:
+        beep = False
+    lasttime = newtime
+
+    global lastuser
+
+    if lastuser != user: 
+        text = user + " says " + message.message
+        lastuser = user
+    else:
+        text = message.message
+    beep_delay = 1
     file_path = None
-    if message.author.name == "@mbeware":
-        file_path = await text_to_speech_async(text=text , voice=voice,    rate=rate,    pitch=pitch,    play_audio=play_audio)
+    file_path = await text_to_speech_async(text=text,voice=voice,rate=rate,pitch=pitch,beep=beep,beep_delay=beep_delay)
     
     if file_path and os.path.exists(file_path):
         os.remove(file_path)

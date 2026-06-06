@@ -100,44 +100,65 @@ async def start_monitor(context):
         dispatcher_t.cancel()
         await asyncio.gather(dispatcher_t, reader_t, return_exceptions=True)
 
-def create_config():
-    config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" 
-    config_file = config_path / "config.toml" 
+# def create_config():
+#     print("create_config doesnt work anymore")
+#     return
 
-    # Creates all intermediate directories if they don't exist
-    os.makedirs(config_path , exist_ok=True)
+#     config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" 
+#     config_file = config_path / "config.toml" 
+
+#     # Creates all intermediate directories if they don't exist
+#     os.makedirs(config_path , exist_ok=True)
     
-    if config_file.exists():
-        raise FileExistsError(f"Config file already exists: {config_path}")
+#     if config_file.exists():
+#         raise FileExistsError(f"Config file already exists: {config_path}")
 
 
-    # Create a new TOML document
-    config = tomlkit.document()
-    config_general = tomlkit.table()
-    config_general["modules_list"] = ["printmsg","TTS"]
-    config_printmsg = tomlkit.table()
-    config_printmsg.add(('file_path = "printmsg/printmsg.py"'))
-    config_tts = tomlkit.table()
-    config_tts.add(('file_path = "ttsbot/ttsbot.py"'))
+#     # Create a new TOML document
+#     config = tomlkit.document()
+#     config_general = tomlkit.table()
+#     config_general["modules_list"] = ["printmsg","TTS"]
+#     config_printmsg = tomlkit.table()
+#     config_printmsg.add(('file_path = "printmsg/printmsg.py"'))
+#     config_tts = tomlkit.table()
+#     config_tts.add(('file_path = "ttsbot/ttsbot.py"'))
    
-    config.add("general",config_general)
-    config.add("printmsg",config_printmsg)
-    config.add("ttsbot",config_tts)
+#     config.add("general",config_general)
+#     config.add("printmsg",config_printmsg)
+#     config.add("ttsbot",config_tts)
 
-    # Write to file
-    with open(config_file, "w") as toml_file:
-        toml_file.write(tomlkit.dumps(config))
+#     # Write to file
+#     with open(config_file, "w") as toml_file:
+#         toml_file.write(tomlkit.dumps(config))
 
 def readconfig():
-    config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" / "config.toml"
+    #read system.config
+    script_dir = Path(__file__).resolve().parent
+
+    config_path = script_dir / "system.config.toml"
 
     if not config_path.exists():
-        raise FileNotFoundError(f"No config file: {config_path}\nRun YTChatMon --install to create it")
+        raise FileNotFoundError(f"No config file: {config_path}")
 
     
     with config_path.open("rb") as f:
         config = tomllib.load(f)
         return config
+
+
+    ##############################################################
+    # No user.config for now. 
+
+    # #read user.config
+    # config_path = Path.home() / ".config" / "YoutubeLiveChatMonitor" / "user.config.toml"
+
+    # if not config_path.exists():
+    #     raise FileNotFoundError(f"No config file: {config_path}")
+
+    
+    # with config_path.open("rb") as f:
+    #     config = tomllib.load(f)
+    #     return config
 
 
 def main():
@@ -146,15 +167,16 @@ def main():
                     description='Monitor and act on live youtube chat',
                     epilog='a mbeware monstruosity')
 
-    parser.add_argument('--install',action='store_true',help='Create configuration files')
+    # parser.add_argument('--install',action='store_true',help='Create configuration files')
     parser.add_argument('--streamid',help='Start monitoring the live stream') 
     parser.add_argument('--debug',help=argparse.SUPPRESS) 
     
     args = parser.parse_args()
 
-    if args.install:
-        create_config()
-        return 0
+    # install doesnt work at the moment. 
+    #if args.install:
+    #    create_config()
+    #    return 0
     
     context={}
     context["args"] = args
@@ -163,7 +185,7 @@ def main():
     context["modules"] = load_modules_from_config(context)
 
     if not args.streamid: 
-        args.streamid='QlwUUv9niuM' # for testing. 
+        args.streamid='ihy3pmf-E2w' # for testing. 
 
     asyncio.run(start_monitor(context))
     return 0 

@@ -1,0 +1,21 @@
+[general]
+modules_list = ["printmsg","TestingEnableSwitch","TTS"]
+["printmsg"]
+file_path = "printmsg/printmsg.py"
+["TTS"]
+file_path = "ttsbot/ttsbot.py"
+voice="en-US-GuyNeural"
+rate="+10%"
+pitch="+3Hz"
+volume="0%"
+play_audio="True"
+sayUsername="True"
+enabled = "True"
+beep= "True"
+beep_delay = 1.5
+beep_pause = 5
+["TestingEnableSwitch"]
+enabled = "False"
+file_path = "FakeFilePath"
+
+
