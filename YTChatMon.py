@@ -56,7 +56,7 @@ async def reader(context):
     chat = pytchat.create(video_id=YoutubeLiveStreamID)
     try:
         while chat.is_alive():
-            for c in chat.get().sync_items():
+            for c in chat.get().sync_items():  # type: ignore
                 await chat_queue.put(c)
             await asyncio.sleep(0.5)
         logger.debug("stream chat is not alive anymore")
@@ -254,6 +254,7 @@ def main():
 
 
 if __name__ == "__main__":
+    print(f"Version : {Path('version.txt').read_text()}")
     exit(main())
 else:
     print("{__name__} loaded as module")
