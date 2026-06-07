@@ -66,13 +66,18 @@ def add_config_to_context(context):
     logger.debug(f"Exited {sys._getframe().f_code.co_name}")
 
 
-print(" .....loading voices")
-voicesfile = MODULE_FOLDER / _ENGLISH_VOICE_LIST
+print(" ......loading voices")
+
+voicesfile = MODULE_FOLDER / _ENGLISH_VOICE_LIST  # remember, MODULE_FOLDER type is a Path, not a string.
+# voicesfile = Path(_ENGLISH_VOICE_LIST) # this is what we have to do, when we dont already have a Path type.
+
 
 allvoices_raw = voicesfile.read_text().splitlines()
 allvoices = []
 for v in allvoices_raw:
     allvoices.append(v.strip())
+
+print(f"loading module TTS ........ {len(allvoices)} voices loaded")
 allpitches = _SELECTED_PITCHES
 allrates = _SELECTED_RATES
 
