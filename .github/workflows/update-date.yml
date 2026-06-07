@@ -1,0 +1,32 @@
+name: Update Date on Push
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  update-date:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Update date in file
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          # Replace 'path/to/your/file.txt' with your actual file path
+          # This example replaces a line containing "_Last updated:"
+          sed -i "s/_Last updated:.*_/_Last updated: ${DATE}_/" version.txt
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add README.md
+          # The || echo ensures the step doesn't fail if no changes were made
+          git commit -m "chore: auto update last updated date" || echo "No changes to commit"
+          git push
