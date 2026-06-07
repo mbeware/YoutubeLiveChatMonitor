@@ -3,8 +3,11 @@ import sys
 from pathlib import Path
 from typing import List
 import tomllib  # Python 3.11+
+import inspect
+import asyncio
 
-# This will need to be rewritten. Many special cases arent managed. 
+# This will need to be rewritten. Many special cases arent managed.
+
 
 def load_modules_from_config(context):
     config = context["config"]
@@ -14,15 +17,13 @@ def load_modules_from_config(context):
 
     loaded_modules = {}
 
-
     # Get the absolute path of the script's directory
     script_dir = Path(__file__).resolve().parent
 
     for module_name in modules_list:
-        
         module_info = config.get(module_name)
-        
-        print(f"loading module {module_name}",end="")
+
+        print(f"loading module {module_name}", end="")
         if not module_info or "file_path" not in module_info:
             raise ValueError(f"Invalid config for '{module_name}'")
 
@@ -31,11 +32,10 @@ def load_modules_from_config(context):
             continue
 
         file_path = script_dir / "modules" / module_info["file_path"]
-        
+
         if not file_path.exists():
             raise FileNotFoundError(f"Module file for {module_name} not found: {file_path}")
 
-        
         spec = importlib.util.spec_from_file_location(module_name, file_path)
         if spec is None or spec.loader is None:
             raise ImportError(f"Error loading module '{module_name}'")
