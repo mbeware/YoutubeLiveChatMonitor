@@ -15,12 +15,12 @@ jobs:
         with:
           persist-credentials: true
 
-      - name: Update date in file
+      - name: Update date and time in file
         run: |
-          DATE=$(date +'%Y-%m-%d')
-          # Replace 'path/to/your/file.txt' with your actual file path
-          # This example replaces a line containing "_Last updated:"
-          sed -i "s/_Last updated:.*_/_Last updated: ${DATE}_/" version.txt
+          # Format: YYYY-MM-DD HH:MM:SS UTC
+          DATETIME=$(date +'%Y-%m-%d %H:%M:%S UTC')
+          # Update the marker in your file (e.g., version.txt)
+          sed -i "s/_Last updated:.*_/_Last updated: ${DATETIME}_/" version.txt
 
       - name: Commit and push changes
         run: |
