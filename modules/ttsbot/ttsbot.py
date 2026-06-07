@@ -18,7 +18,7 @@ _CHATUSER_CONFIG_FILE = "chatuser_config.toml"
 _PRESENTATION_VOICE = "en-US-AriaNeural"
 _PRESENTATION_PITCH = "+0Hz"
 _PRESENTATION_RATE = "+0%"
-_USER_PITCH_DEFAULT = "+0Hz"
+_USER_PITCH_DEFAULT = "+15Hz"
 _USER_RATE_DEFAULT = "+0%"
 _BEEP_SOUND = "beep.mp3"
 _BEEP_RESET_DELAY = 20
@@ -256,6 +256,8 @@ async def get_author_info(author_name) -> User_Info:
             TTSuser = "Maple Circuit"
         elif user == "mbeware":
             TTSuser = "embeware"
+        elif user == "Sam_may_b_silly":
+            TTSuser = "Sam"
 
         newuser = User_Info(
             name=user,
