@@ -24,6 +24,7 @@ _BEEP_SOUND = "beep.mp3"
 _BEEP_RESET_DELAY = 20
 _TTSBOT_LOG = "ttsbot.log"
 
+MODULE_FOLDER = Path(__file__).resolve().parent
 
 # Create logger
 logger = logging.getLogger(__name__)
@@ -66,7 +67,7 @@ def add_config_to_context(context):
 
 
 print(" .....loading voices")
-voicesfile = Path(__file__).resolve().parent / _ENGLISH_VOICE_LIST
+voicesfile = MODULE_FOLDER / _ENGLISH_VOICE_LIST
 
 allvoices_raw = voicesfile.read_text().splitlines()
 allvoices = []

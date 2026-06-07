@@ -1,7 +1,6 @@
 en-CA-ClaraNeural               
 en-CA-LiamNeural                
 en-GB-LibbyNeural               
-en-GB-MaisieNeural              
 en-GB-RyanNeural                
 en-GB-SoniaNeural               
 en-GB-ThomasNeural              

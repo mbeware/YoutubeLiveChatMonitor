@@ -146,6 +146,7 @@ async def start_monitor(context):
     dispatcher_t = asyncio.create_task(dispatcher(context))
 
     try:
+        print(f"{__file__} succesffuly started... Probably... Maybe...")
         await asyncio.gather(dispatcher_t, reader_t)
 
     except KeyboardInterrupt:
