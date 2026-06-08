@@ -30,11 +30,16 @@ def start_all_modules(streamid):
         # Wait for all to finish
         exit_codes = [current_process.wait() for current_process in processes]
         LOG.info(f"{exit_codes=}")
-
+    except KeyboardInterrupt:
+        pass
     except Exception as e:
         LOG.critical(f"start_all_modules - exception : {e}")
         print(f"YTChatMon - start_all_modules - exception : {e}")
-        exit()
+
+    finally:
+        for current_process in processes:
+            if current_process.poll() is None:
+                current_process.kill()
 
 
 def main():
