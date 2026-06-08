@@ -209,6 +209,10 @@ def read_TTSuserconfig():
                 except Exception:
                     pass
             create_presentation(t)
+
+        if len(ALLVOICES) == 0:
+            load_voicenames()
+
     else:
         USERS = {}
 
@@ -347,7 +351,7 @@ def TestTiming():
     gap_end("presentation generated")
     gap_start("Before loop")
     for v in ALLVOICES:
-        print(f"testing {v} ")
+        print(f"Module_TTSbot - testing {v} ")
         gap_end(f"start of loop for {v}")
         gap_start("Call Player")
         generate_and_play_audio(
@@ -368,10 +372,10 @@ def main():
     global LOG
     global ARGS
     global ALL_CONFIG
-    print(f"Loading config from {MAIN_CONFIG_FILE}")
+    print(f"Module_TTSbot - Loading config from {MAIN_CONFIG_FILE}")
     ALL_CONFIG = readconfig(MAIN_CONFIG_FILE)
     CONFIG = ALL_CONFIG.TTSbot
-    print(f"Logging event to {CONFIG.EVENTLOG}")
+    print(f"Module_TTSbot - Logging event to {CONFIG.EVENTLOG}")
     LOG = logger.get_logger(__file__, logger.DEBUG, CONFIG.EVENTLOG)
 
     if CONFIG.TESTTIMING == "Enabled":

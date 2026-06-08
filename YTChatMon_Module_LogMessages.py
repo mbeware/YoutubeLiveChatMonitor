@@ -18,12 +18,8 @@ def log_message(message):
     global LAST_MESSAGE
     global CONFIG
 
-    #    if message.timestamp > LAST_MESSAGE:
     with open(CONFIG.MESSAGE_LOGFILE, mode="a") as f:
         f.write(f"{message.datetime} {message.timestamp} [{message.author.name}]- {message.message}\n")
-
-
-#            LAST_MESSAGE = message.timestamp
 
 
 def main():
