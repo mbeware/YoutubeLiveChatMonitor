@@ -250,7 +250,7 @@ def main():
     context["modules"] = load_modules_from_config(context)
 
     if not args.streamid:
-        args.streamid = "anQ1ROeUctk"  # for testing.
+        args.streamid = "cbzEYxK734U"  # for testing.
 
     asyncio.run(start_monitor(context))
     logger.debug(f"Exited {sys._getframe().f_code.co_name}")
