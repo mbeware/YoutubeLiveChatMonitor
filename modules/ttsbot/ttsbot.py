@@ -8,7 +8,7 @@ import tomlkit
 import os
 import logging
 import sys
-
+from datetime import datetime
 
 _BEEP_PAUSE = 1
 _ENGLISH_VOICE_LIST = "LimitedEnglishVoices.txt"
@@ -204,7 +204,7 @@ async def text_to_speech_async(
     if not text.strip():
         logger.debug(f"Exited {sys._getframe().f_code.co_name}")
         return
-
+    logger.info(f"Timing for {message.message} - {datetime.now()} - Starting FFPLAY")
     process = await asyncio.create_subprocess_exec(
         "ffplay",
         "-nodisp",
@@ -217,22 +217,26 @@ async def text_to_speech_async(
         stdout=asyncio.subprocess.DEVNULL,
         stderr=asyncio.subprocess.DEVNULL,
     )
+    logger.info(f"Timing for {message.message} - {datetime.now()} - Playing preśentation")
     if presentation:
         process.stdin.write(presentation)
         # await process.stdin.drain()
-
+    logger.info(f"Timing for {message.message} - {datetime.now()} - Starting the TTS of the message")
     communicate = edge_tts.Communicate(text=text, voice=voice, rate=rate, pitch=pitch)
-
+    logger.info(f"Timing for {message.message} - {datetime.now()} - Starting streaming of the generated TTS")
     try:
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
                 process.stdin.write(chunk["data"])
                 await process.stdin.drain()
+        logger.info(f"Timing for {message.message} - {datetime.now()} - waiting for the message finish playing")
     except Exception:
         pass
     finally:
+        logger.info(f"Timing for {text} - {datetime.now()}")
         process.stdin.close()
         await process.wait()
+        logger.info(f"Timing for {message.message} - {datetime.now()} - message played")
         logger.debug(f"exited {sys._getframe().f_code.co_name}")
 
 
@@ -271,11 +275,11 @@ async def get_author_info(author_name) -> User_Info:
 
         users[user] = newuser
         save_users(users, Path(_CHATUSER_CONFIG_FILE))
-
-    presentation_text: str = f"{users[user].TTSname}  says"
-    user_presentation[user] = await generate_tts_bytes(
-        text=presentation_text, voice=_PRESENTATION_VOICE, rate=_PRESENTATION_RATE, pitch=_PRESENTATION_PITCH
-    )
+    if user not in user_presentation.keys():
+        presentation_text: str = f"{users[user].TTSname}  says"
+        user_presentation[user] = await generate_tts_bytes(
+            text=presentation_text, voice=_PRESENTATION_VOICE, rate=_PRESENTATION_RATE, pitch=_PRESENTATION_PITCH
+        )
 
     logger.debug(f"Exited {sys._getframe().f_code.co_name}")
     return users[user]
@@ -291,8 +295,11 @@ async def check_beep():
 
     global LASTTIME
     if newtime - LASTTIME > _BEEP_RESET_DELAY:
+        logger.info(f"Timing for {message.message} - {datetime.now()} - before beep")
         await play_beep()
+        logger.info(f"Timing for {message.message} - {datetime.now()} - after play beep")
         await asyncio.sleep(_BEEP_PAUSE)
+        logger.info(f"Timing for {message.message} - {datetime.now()} - after beep pause")
     logger.debug(f"Exited {sys._getframe().f_code.co_name}")
 
 
@@ -309,12 +316,14 @@ async def process_message(message, context):
     # In this version, a "voice" is randomly assigned to each user
     # That assignation is not saved and will probably be different the next time the tool is used.
     logger.debug(f"Entered {sys._getframe().f_code.co_name}")
+    logger.info(f"Timing for {message.message} - {datetime.now()} - Start of TTSbot")
     config = context["config"]
 
     TTS_config = config["TTS"]
-
+    logger.info(f"Timing for {message.message} - {datetime.now()} - launching get_author_info")
     user_info = await get_author_info(message.author.name)
-    await check_beep()
+    if TTS_config.beep:
+        await check_beep()
     text = message.message
     global LASTUSER
 
@@ -322,7 +331,7 @@ async def process_message(message, context):
     if LASTUSER != user_info.name:
         LASTUSER = user_info.name
         presentation = user_presentation[user_info.name]
-
+    logger.info(f"Timing for {message.message} - {datetime.now()} - starting TTS")
     await text_to_speech_async(
         text=text,
         voice=user_info.voice,
@@ -330,6 +339,7 @@ async def process_message(message, context):
         pitch=user_info.pitch,
         presentation=presentation,  # will be none if same user as last message
     )
+    logger.info(f"Timing for {message.message} - {datetime.now()} - TTS ended")
     global LASTTIME
     LASTTIME = time.perf_counter()
     logger.debug(f"Exited {sys._getframe().f_code.co_name}")

@@ -28,6 +28,7 @@ import inspect
 import tomllib
 import sys
 import logging
+from datetime import datetime
 
 
 # Create logger
@@ -57,6 +58,7 @@ async def reader(context):
     try:
         while chat.is_alive():
             for c in chat.get().sync_items():  # type: ignore
+                logger.info(f"Timing for {c.message} - {datetime.now()} - Message queued")
                 await chat_queue.put(c)
             await asyncio.sleep(0.5)
         logger.debug("stream chat is not alive anymore")
@@ -81,7 +83,7 @@ async def dispatcher(context):
     try:
         while True:
             message = await chat_queue.get()  # Blocking/wait forever
-
+            logger.info(f"Timing for {message.message} - {datetime.now()} - Message dequeued")
             if message is None:
                 logger.debug("message is None. Signal to end everything")
                 break
@@ -97,9 +99,11 @@ async def dispatcher(context):
                         # wrap sync in thread to avoid blocking
                         loop = asyncio.get_running_loop()
                         tasks.append(loop.run_in_executor(None, func, message, context))
+                    logger.info(f"Timing for {message.message} - {datetime.now()} - Message being processed by {name}")
             if len(tasks) > 0:
+                logger.info(f"Timing for {message.message} - {datetime.now()} - Waiting for all modules to return")
                 await asyncio.gather(*tasks, return_exceptions=True)
-
+                logger.info(f"Timing for {message.message} - {datetime.now()} - All modules returned after waiting")
             sys.stdout.write(f"\rMessages left in queue : {chat_queue.qsize()}")
             sys.stdout.flush()
 
