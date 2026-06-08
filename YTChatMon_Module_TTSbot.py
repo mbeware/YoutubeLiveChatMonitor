@@ -10,13 +10,10 @@ from pathlib import Path
 import asyncio
 import edge_tts
 from dataclasses import dataclass, asdict
-import random
-from pathlib import Path
 import time
 import tomlkit
 import os
 import logging
-import sys
 from datetime import datetime
 import subprocess
 
@@ -46,6 +43,7 @@ GAP_START_INFO = ""
 GAP_START_TIME = datetime.now()
 LOG_TIMING = None
 ALL_CONFIG: ConfigObject
+MAIN_CONFIG_FILE = "YTChatMon.toml"
 
 
 def activate_gap():
@@ -370,20 +368,20 @@ def main():
     global LOG
     global ARGS
     global ALL_CONFIG
-    print(f"Loading config from {__file__[:-3]}.toml")
-    ALL_CONFIG = readconfig(f"{__file__[:-3]}.toml")
-    CONFIG = ALL_CONFIG.general
+    print(f"Loading config from {MAIN_CONFIG_FILE}")
+    ALL_CONFIG = readconfig(MAIN_CONFIG_FILE)
+    CONFIG = ALL_CONFIG.TTSbot
+    print(f"Logging event to {CONFIG.EVENTLOG}")
+    LOG = logger.get_logger(__file__, logger.DEBUG, CONFIG.EVENTLOG)
 
     if CONFIG.TESTTIMING == "Enabled":
-        print("starting timing tests")
+        LOG.info("starting timing tests")
         TestTiming()
         exit()
 
     if CONFIG.GAP_MONITOR == "Enabled":
-        print("Activating gap monitor")
+        LOG.info("Activating gap monitor")
         activate_gap()
-    print(f"Logging event to {CONFIG.TTSBOT_LOG}")
-    LOG = logger.get_logger(__file__, logger.DEBUG, CONFIG.TTSBOT_LOG)
 
     parser = argparse.ArgumentParser(
         prog=f"{__file__}", description="TTSbot for youtube", epilog="a mbeware monstruosity"
@@ -392,30 +390,28 @@ def main():
     ARGS = parser.parse_args()
 
     # read voicelist
-    print("Loading voices", end="")
     load_voicenames()
-    print(f" - {len(ALLVOICES)} loaded")
+    LOG.info(f"{len(ALLVOICES)} voices loaded")
     # read existing users
-    print("Loading known users", end="")
     read_TTSuserconfig()
-    print(f" - {len(USERS)} users loaded")
+    LOG.info(f"{len(USERS)} users loaded")
     # cache sounds
-    print("Caching beep sound")
+    LOG.info("Caching beep sound")
     cache_beep()
 
     if not ARGS.streamid:
-        if "STREAMID" in ALL_CONFIG["general"].keys():
-            print(f"Starting with streamid from config file : {CONFIG.STREAMID}")
+        if "STREAMID" in ALL_CONFIG["GLOBAL"].keys():
+            LOG.info(f"Starting with streamid from config file : {CONFIG.STREAMID}")
             ARGS.streamid = str(CONFIG.STREAMID)
         else:
             ARGS.streamid = "PCOOSewAYMc"  # for testing.
-            print(f"Starting with hardcoded streamid {ARGS.streamid}")
+            LOG.info(f"Starting with hardcoded streamid {ARGS.streamid}")
     else:
-        print(f"Starting with commandline streamid : {ARGS.streamid}")
-    print("Ready. Waiting for messages")
-    chatreader(TTSmessage, ARGS.streamid)
+        LOG.info(f"Starting with commandline streamid : {ARGS.streamid}")
+    print("Module_TTSbot Ready. Waiting for messages")
+    chatreader(TTSmessage, ARGS.streamid, "TTSbot")
 
 
 if __name__ == "__main__":
-    print(f"Version : {Path('version.txt').read_text()}")
+    print(f"Module_TTSbot Version : {Path('version.txt').read_text()}")
     main()

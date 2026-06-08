@@ -1,19 +1,10 @@
 import logging
-from dataclasses import dataclass
-
-
-print("logger logger.py")
-
 
 DEBUG = logging.DEBUG
 INFO = logging.INFO
 WARNING = logging.WARNING
 CRITICAL = logging.CRITICAL
 ERROR = logging.ERROR
-
-
-def logger():
-    print("logger function")
 
 
 def get_logger(logger_name: str, level=DEBUG, log_filename: str = "") -> logging.Logger:
@@ -32,5 +23,5 @@ def get_logger(logger_name: str, level=DEBUG, log_filename: str = "") -> logging
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
-    
+
     return logger

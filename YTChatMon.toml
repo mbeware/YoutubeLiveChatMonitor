@@ -1,0 +1,58 @@
+[MODULES]
+MODULE_LIST = ["TTSbot","LogMessages"]
+
+[GLOBAL]
+STREAMID="yKzKFYkKhGU"
+
+[YTChatMon]
+EVENTLOG = "YtChatMonEvent.log"
+
+[ChatReader]
+EVENTLOG = "ChatReader.log"
+ERROR = "True" 
+
+[TTSbot]
+EXECUTABLE = "YTChatMon_Module_TTSbot.py"
+BEEP_PAUSE = 1
+ENGLISH_VOICE_LIST = "LimitedEnglishVoices.txt"
+SELECTED_PITCHES = ["-2Hz", "+0Hz", "+2Hz"]
+SELECTED_RATES = ["-5%", "+0%", "+5%"]
+CHATUSER_CONFIG_FILE = "chatuser_config.toml"
+PRESENTATION_VOICE = "en-US-AriaNeural"
+PRESENTATION_PITCH = "+0Hz"
+PRESENTATION_RATE = "+15%"
+PRESENTATION_VOLUME = "+0%"
+USER_PITCH_DEFAULT = "+0Hz"
+USER_RATE_DEFAULT = "+15%"
+USER_DEFAULT_VOLUME = "+0%"
+BEEP_SOUND = "beep.mp3"
+BEEP_RESET_DELAY = 20
+TTSBOT_LOG = "YTChatMon_Module_TTSbot.log"
+EVENTLOG = "YTChatMon_Module_TTSbot.log"
+BEEP = "Enabled"
+TTSCommand = "Disabled"
+GAP_MONITOR = "Disabled"
+GAP_LOG = "YTChatMon_Module_TTSbot_Timing.log" 
+TESTTIMING = "Disabled" 
+COMMAND_PREFIX = ":speech_bubble:"
+
+[predefined_users]
+# name = [TTSname,voice,rate,pitch,volume]
+mbeware=["em beware","en-GB-RyanNeural","None","None","None"]
+maple-circuit-live=["Maple Circuit","None","None","None","None"]
+sam_m_be_silly=["Sam","None","None","+200Hz","None",]
+
+[LogMessages]
+EXECUTABLE = "YTChatMon_Module_LogMessages.py"
+EVENTLOG = "YTChatMon_Module_LogMessage.log"
+MESSAGE_LOGFILE = "YTChatMon_Module_LogMessage.Replay.txt"
+# COMMAND_MESSAGE in ["<commandlogfilename>", DISABLED, ENABLED]
+COMMAND_MESSAGE = "Enabled" 
+
+[BotCommander]
+CommanderList = ["TTSbot","ActionBot"]
+
+[ActionBot]
+ACTIONBOT_LOG = "actionbot.log"
+COMMAND_PREFIX = ":maple_leaf:"
+
