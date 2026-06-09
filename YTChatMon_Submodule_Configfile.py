@@ -1,6 +1,5 @@
 from pathlib import Path
 import tomlkit
-from typing import Any
 
 
 class ConfigObject(dict):

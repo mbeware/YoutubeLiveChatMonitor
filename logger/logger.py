@@ -6,6 +6,8 @@ WARNING = logging.WARNING
 CRITICAL = logging.CRITICAL
 ERROR = logging.ERROR
 
+Logger = logging.Logger
+
 
 def get_logger(logger_name: str, level=DEBUG, log_filename: str = "") -> logging.Logger:
     # Create logger

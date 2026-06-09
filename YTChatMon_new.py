@@ -1,13 +1,13 @@
 import subprocess
 from pathlib import Path
-from logger import logger
+from logger import logger, colors
 from YTChatMon_Submodule_Configfile import readconfig, ConfigObject
 import argparse
 
 
 MODULE_FOLDER = Path(__file__).resolve().parent
 CONFIG = None
-LOG = None
+LOG: logger.Logger
 ARGS = None
 ALL_CONFIG: ConfigObject
 MAIN_CONFIG_FILE = "YTChatMon.toml"
@@ -31,13 +31,15 @@ def start_all_modules(streamid):
         exit_codes = [current_process.wait() for current_process in processes]
         LOG.info(f"{exit_codes=}")
     except KeyboardInterrupt:
-        pass
+        print(
+            f'{colors.OKBLUE}** CTRL-C - you are breaking up with me? fine, just kill me then. What do you mean by {colors.BOLD}"that is what is going to ha{colors.ENDC}{colors.OKBLUE}/{colors.FAIL}PROCESS TERMINATED{colors.OKGREEN} ;-){colors.ENDC}'
+        )
     except Exception as e:
         LOG.critical(f"start_all_modules - exception : {e}")
         print(f"YTChatMon - start_all_modules - exception : {e}")
 
     finally:
-        for current_process in processes:
+        for current_process in processes: # type: ignore
             if current_process.poll() is None:
                 current_process.kill()
 

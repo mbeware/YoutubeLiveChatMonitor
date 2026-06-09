@@ -2,7 +2,7 @@
 MODULE_LIST = ["TTSbot","LogMessages"]
 
 [GLOBAL]
-STREAMID="yKzKFYkKhGU"
+STREAMID="wXxDFWgvTpw"
 
 [YTChatMon]
 EVENTLOG = "YtChatMonEvent.log"
@@ -12,6 +12,8 @@ EVENTLOG = "ChatReader.log"
 ERROR = "True" 
 
 [TTSbot]
+#possible values for REMOVE_DUPLICATE_WORDS = ["emojee_only", "all", "Disabled"]
+REMOVE_DUPLICATE_WORDS = "emojii_only"
 EXECUTABLE = "YTChatMon_Module_TTSbot.py"
 BEEP_PAUSE = 1
 ENGLISH_VOICE_LIST = "LimitedEnglishVoices.txt"

@@ -18,7 +18,7 @@ def log_message(message):
     global LAST_MESSAGE
     global CONFIG
 
-    with open(CONFIG.MESSAGE_LOGFILE, mode="a") as f:
+    with open(CONFIG.MESSAGE_LOGFILE, mode="a") as f: # pyright: ignore[reportOptionalMemberAccess]
         f.write(f"{message.datetime} {message.timestamp} [{message.author.name}]- {message.message}\n")
 
 

@@ -2,19 +2,14 @@ from logger import logger
 from YTChatMon_Submodule_ChatReader import chatreader
 from YTChatMon_Submodule_Configfile import readconfig, ConfigObject
 
-
-import argparse
+from dataclasses import dataclass, asdict
 from pathlib import Path
-
-
+import argparse
 import asyncio
 import edge_tts
-from dataclasses import dataclass, asdict
 import time
 import tomlkit
 import os
-import logging
-from datetime import datetime
 import subprocess
 
 
@@ -37,33 +32,72 @@ ALLVOICES_CACHE: list[str] = []
 LASTUSER = ""
 LASTTIME = 0
 CONFIG = None
-LOG = None
+LOG: logger.Logger
 ARGS = None
-GAP_START_INFO = ""
-GAP_START_TIME = datetime.now()
-LOG_TIMING = None
+LOG_TIMING: logger.Logger
 ALL_CONFIG: ConfigObject
 MAIN_CONFIG_FILE = "YTChatMon.toml"
 
 
-def activate_gap():
-    global LOG_TIMING
-    LOG_TIMING = logger.get_logger("TIMING", logging.DEBUG, CONFIG.GAP_LOG)
+def remove_duplicate_words(text, only_emojii=True):
+    #
+    text = text.replace("::", ": :")  # make sure we have a space between emojii as space is the splitter
+    tokens = text.split()
+    if not tokens:
+        return text
+
+    result = []
+    index_current_token = 0
+    index_next_token = 1  # Just to make the linter stop complaining about "Unbound Variable"
+
+    while index_current_token < len(tokens):
+        count = 0
+
+        current_token = tokens[index_current_token]
+        if (current_token[0] == ":" and current_token[-1] == ":") or not only_emojii:
+            count = 1
+
+            index_next_token = index_current_token + 1
+            while index_next_token < len(tokens) and tokens[index_next_token] == current_token:
+                count += 1
+                index_next_token += 1
+
+        if count > 1:
+            result.append(f"{count}")
+            result.append(current_token)
+            index_current_token = index_next_token
+        else:
+            result.append(current_token)
+            index_current_token += 1
+
+    return " ".join(result)
 
 
-def gap_start(info):
-    global GAP_START_TIME
-    global GAP_START_INFO
-    GAP_START_TIME = datetime.now()
-    GAP_START_INFO = info
+def test_remove_duplicate_words():
+    tests = [
+        "The gift was a trap :snake: :snake:",
+        ":time: :time: :time:",
+        "This is a :test:",
+        "The :pool: is near the other :pool: in the back",
+        "3 :o: :o: :o: :o: 4",
+        "ABC ABC ABC ABC",
+        ":aaa: :aaa: :bbb: :bbb: :aaa: :aaa:",
+        ":aaa: :bbb: :aaa: :bbb:",
+    ]
+    print("Remove only duplicate emojii")
+    for t in tests:
+        print(f"Input:  {t}")
+        print(f"Output: {remove_duplicate_words(t, only_emojii=True)}")
+        print("-" * 30)
+    print("Remove all duplicate words")
+    for t in tests:
+        print(f"Input:  {t}")
+        print(f"Output: {remove_duplicate_words(t, only_emojii=False)}")
+        print("-" * 30)
+    exit()
 
 
-def gap_end(info):
-    global GAP_START_TIME
-    global GAP_START_INFO
-    global LOG_TIMING
-    if CONFIG.GAP_MONITOR == "Enabled":
-        LOG_TIMING.info(f"{GAP_START_INFO}->{info}:{datetime.now() - GAP_START_TIME}")
+# test_remove_duplicate_words()
 
 
 def load_voicenames():
@@ -74,7 +108,8 @@ def load_voicenames():
         ALLVOICES = ALLVOICES_CACHE.copy()
         return
 
-    voicesfile = MODULE_FOLDER / CONFIG.ENGLISH_VOICE_LIST  # remember, MODULE_FOLDER type is a Path, not a string.
+    voicesfile = MODULE_FOLDER / CONFIG.ENGLISH_VOICE_LIST  # type: ignore
+    # remember, MODULE_FOLDER type is a Path, not a string.
     # voicesfile = Path(CONFIG.ENGLISH_VOICE_LIST) # this is what we have to do, when we dont already have a Path type.
 
     allvoices_raw = voicesfile.read_text().splitlines()
@@ -107,7 +142,6 @@ def generate_and_play_audio(TTStext, TTSvoice="", TTSpitch="+0Hz", TTSrate="+0%"
 
     async def play_audio_async():
 
-        gap_start("Start ffplay")
         process = await asyncio.create_subprocess_exec(
             "ffplay",
             "-nodisp",
@@ -120,45 +154,22 @@ def generate_and_play_audio(TTStext, TTSvoice="", TTSpitch="+0Hz", TTSrate="+0%"
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL,
         )
-        gap_end("ffplay started")
         if presentation:
-            gap_start("playing presentation")
-            process.stdin.write(presentation)
-            gap_end("presentation played")
-            gap_start("Waiting for buffer")
-            await process.stdin.drain()
-            gap_end("buffer empty")
-        gap_start("Calling TTS")
+            process.stdin.write(presentation)  # type: ignore
+            await process.stdin.drain()  # type: ignore
         communicate = edge_tts.Communicate(text=TTStext, voice=TTSvoice, rate=TTSrate, pitch=TTSpitch, volume=TTSvolume)
-        gap_end("TTS called")
         try:
-            gap_start("Getting chunks")
             async for chunk in communicate.stream():
-                gap_end("Chunk obtained")
                 if chunk["type"] == "audio":
-                    gap_start("writting to player")
-                    process.stdin.write(chunk["data"])
-                    gap_end("return from player")
-                    gap_start("waiting for buffer")
-                    await process.stdin.drain()
-                    gap_end("Buffer empty")
-                    gap_start("Looping back for next chunk")
+                    process.stdin.write(chunk["data"])  # type: ignore
+                    await process.stdin.drain()  # type: ignore
         except Exception:
             pass
         finally:
-            gap_end("Loop ended")
-            gap_start("Closing stdin")
-            process.stdin.close()
-            gap_end("Stdin closed")
-            gap_start("ending process")
+            process.stdin.close()  # type: ignore
             await process.wait()
-            gap_end("process ended")
 
-    gap_end("reday to play")
-    gap_start("calling async play")
     asyncio.run(play_audio_async())
-    gap_end("back from playing async")
-    gap_start("returning from playing")
 
 
 def save_users(data: dict[str, User_Info], path: Path):
@@ -176,7 +187,7 @@ def load_users(path: Path) -> dict[str, User_Info]:
     try:
         with open(path, "rb") as f:
             data = tomlkit.load(f)
-    except Exception as e:
+    except Exception:
         return {}
 
     # Reconstruct dataclasses
@@ -188,10 +199,10 @@ def create_presentation(user_info: User_Info):
     presentation_text: str = f"{user_info.TTSname}  says"
     USER_PRESENTATION[user_info.name] = generate_audio(
         TTStext=presentation_text,
-        TTSvoice=CONFIG.PRESENTATION_VOICE,
-        TTSrate=CONFIG.PRESENTATION_RATE,
-        TTSpitch=CONFIG.PRESENTATION_PITCH,
-        TTSvolume=CONFIG.PRESENTATION_VOLUME,
+        TTSvoice=CONFIG.PRESENTATION_VOICE,  # pyright: ignore[reportOptionalMemberAccess]
+        TTSrate=CONFIG.PRESENTATION_RATE,  # pyright: ignore[reportOptionalMemberAccess]
+        TTSpitch=CONFIG.PRESENTATION_PITCH,  # pyright: ignore[reportOptionalMemberAccess]
+        TTSvolume=CONFIG.PRESENTATION_VOLUME,  # pyright: ignore[reportOptionalMemberAccess]
     )
 
 
@@ -199,8 +210,8 @@ def create_presentation(user_info: User_Info):
 def read_TTSuserconfig():
     global USERS
     global USER_PRESENTATION
-    if os.path.isfile(CONFIG.CHATUSER_CONFIG_FILE):
-        USERS = load_users(Path(CONFIG.CHATUSER_CONFIG_FILE))
+    if os.path.isfile(CONFIG.CHATUSER_CONFIG_FILE):  # pyright: ignore[reportOptionalMemberAccess]
+        USERS = load_users(Path(CONFIG.CHATUSER_CONFIG_FILE))  # pyright: ignore[reportOptionalMemberAccess]
         for u in USERS.values():  # removing all used voices, leaving at least one.
             t: User_Info = u
             if len(ALLVOICES) > 0:
@@ -220,7 +231,7 @@ def read_TTSuserconfig():
 def cache_beep():
     # pregenerate beep
     global BEEP_AUDIO
-    with open(CONFIG.BEEP_SOUND, "rb") as f:
+    with open(CONFIG.BEEP_SOUND, "rb") as f:  # pyright: ignore[reportOptionalMemberAccess]
         BEEP_AUDIO = f.read()
 
 
@@ -241,8 +252,8 @@ def play_audio(audio_byte_stream):
         stderr=subprocess.DEVNULL,
     )
 
-    process.stdin.write(audio_byte_stream)
-    process.stdin.close()
+    process.stdin.write(audio_byte_stream)  # type: ignore
+    process.stdin.close()  # type: ignore
     process.wait()
 
 
@@ -260,9 +271,9 @@ def get_author_info(author_name) -> User_Info:
             name=user,
             TTSname=TTSuser,
             voice=ALLVOICES.pop(),
-            pitch=CONFIG.USER_PITCH_DEFAULT,
-            rate=CONFIG.USER_RATE_DEFAULT,
-            volume=CONFIG.USER_DEFAULT_VOLUME,
+            pitch=CONFIG.USER_PITCH_DEFAULT,  # pyright: ignore[reportOptionalMemberAccess]
+            rate=CONFIG.USER_RATE_DEFAULT,  # pyright: ignore[reportOptionalMemberAccess]
+            volume=CONFIG.USER_DEFAULT_VOLUME,  # pyright: ignore[reportOptionalMemberAccess]
         )
 
         if len(ALLVOICES) == 0:
@@ -287,7 +298,7 @@ def get_author_info(author_name) -> User_Info:
                 newuser.volume = value
 
         USERS[user] = newuser
-        save_users(USERS, Path(CONFIG.CHATUSER_CONFIG_FILE))
+        save_users(USERS, Path(CONFIG.CHATUSER_CONFIG_FILE))  # pyright: ignore[reportOptionalMemberAccess]
         create_presentation(newuser)
     return USERS[user]
 
@@ -295,9 +306,9 @@ def get_author_info(author_name) -> User_Info:
 def check_beep():
     global LASTTIME
     newtime = time.perf_counter()
-    if newtime - LASTTIME > CONFIG.BEEP_RESET_DELAY:
+    if newtime - LASTTIME > CONFIG.BEEP_RESET_DELAY:  # pyright: ignore[reportOptionalMemberAccess]
         play_audio(BEEP_AUDIO)
-        pause_time = CONFIG.BEEP_PAUSE - (time.perf_counter() - newtime)
+        pause_time = CONFIG.BEEP_PAUSE - (time.perf_counter() - newtime)  # pyright: ignore[reportOptionalMemberAccess]
         time.sleep(max(pause_time, 0))
 
 
@@ -305,14 +316,10 @@ def TTSmessage(message):
     global LASTUSER
     global CONFIG
     global LASTTIME
-    gap_start("getauthorinfo")
     user_info = get_author_info(message.author.name)
-    gap_end("return from getauthorinfo")
     # TD : Add check for parameter beep
-    if CONFIG.BEEP == "Enabled":
-        gap_start("Playing the beep")
+    if CONFIG.BEEP == "Enabled":  # pyright: ignore[reportOptionalMemberAccess]
         check_beep()
-        gap_end("beep played")
     text = message.message
 
     presentation = None
@@ -323,7 +330,16 @@ def TTSmessage(message):
         except Exception:
             create_presentation(user_info)
 
-    gap_start("calling TTS player")
+    if CONFIG.REMOVE_DUPLICATE_WORDS == "emojii_only":  # pyright: ignore[reportOptionalMemberAccess]
+        only_emojii = True
+    elif CONFIG.REMOVE_DUPLICATE_WORDS == "all":  # pyright: ignore[reportOptionalMemberAccess]
+        only_emojii = False
+    else:  # ONFIG.REMOVE_DUPLICATE_WORDS == "Disabled"
+        only_emojii = None
+
+    if only_emojii is not None:
+        text = remove_duplicate_words(text, only_emojii=only_emojii)
+
     generate_and_play_audio(
         TTStext=text,
         TTSvoice=user_info.voice,
@@ -332,38 +348,7 @@ def TTSmessage(message):
         TTSvolume=user_info.volume,
         presentation=presentation,  # will be none if same user as last message
     )
-    gap_end("Return from TTS player")
     LASTTIME = time.perf_counter()
-
-
-def TestTiming():
-    CONFIG.GAP_MONITOR = "Enabled"
-    activate_gap()
-    load_voicenames()
-    gap_start("generate presentation")
-    testp = generate_audio(
-        TTStext="em beware says",
-        TTSvoice=CONFIG.PRESENTATION_VOICE,
-        TTSrate=CONFIG.PRESENTATION_RATE,
-        TTSpitch=CONFIG.PRESENTATION_PITCH,
-        TTSvolume=CONFIG.PRESENTATION_VOLUME,
-    )
-    gap_end("presentation generated")
-    gap_start("Before loop")
-    for v in ALLVOICES:
-        print(f"Module_TTSbot - testing {v} ")
-        gap_end(f"start of loop for {v}")
-        gap_start("Call Player")
-        generate_and_play_audio(
-            TTStext=f"This is a test with {v} voice",
-            TTSvoice=v,
-            TTSrate=CONFIG.PRESENTATION_RATE,
-            TTSpitch=CONFIG.PRESENTATION_PITCH,
-            TTSvolume=CONFIG.PRESENTATION_VOLUME,
-            presentation=testp,
-        )
-        gap_end("Return from Player")
-        gap_start("End of loop")
 
 
 def main():
@@ -377,15 +362,6 @@ def main():
     CONFIG = ALL_CONFIG.TTSbot
     print(f"Module_TTSbot - Logging event to {CONFIG.EVENTLOG}")
     LOG = logger.get_logger(__file__, logger.DEBUG, CONFIG.EVENTLOG)
-
-    if CONFIG.TESTTIMING == "Enabled":
-        LOG.info("starting timing tests")
-        TestTiming()
-        exit()
-
-    if CONFIG.GAP_MONITOR == "Enabled":
-        LOG.info("Activating gap monitor")
-        activate_gap()
 
     parser = argparse.ArgumentParser(
         prog=f"{__file__}", description="TTSbot for youtube", epilog="a mbeware monstruosity"
@@ -405,10 +381,10 @@ def main():
 
     if not ARGS.streamid:
         if "STREAMID" in ALL_CONFIG["GLOBAL"].keys():
-            LOG.info(f"Starting with streamid from config file : {CONFIG.STREAMID}")
-            ARGS.streamid = str(CONFIG.STREAMID)
+            LOG.info(f"Starting with streamid from config file : {ALL_CONFIG['GLOBAL'].STREAMID}")
+            ARGS.streamid = str(ALL_CONFIG["GLOBAL"].STREAMID)
         else:
-            ARGS.streamid = "PCOOSewAYMc"  # for testing.
+            ARGS.streamid = "wXxDFWgvTpw"  # for testing.
             LOG.info(f"Starting with hardcoded streamid {ARGS.streamid}")
     else:
         LOG.info(f"Starting with commandline streamid : {ARGS.streamid}")
